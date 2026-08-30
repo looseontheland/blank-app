@@ -52,7 +52,13 @@ date or engagement, and click through to the original post.
 python build_records.py      # raw xarchive export -> data/records.json
 python build_classified.py   # + labels/*.tsv + signal/cut*.txt -> data/classified.json
 python export_csv.py         #  -> data/bookmarks.csv + data/bookmarks-signal.csv
+python build_folders.py      #  -> export/Bookmark Library/ (a folder tree)
 ```
+
+`build_folders.py` writes the library as folders to drop on a desktop: a folder
+per shelf, a markdown file per sub-shelf, numbered biggest-first, with the
+signal cut and the full library as parallel trees. It bundles the offline site
+and the CSVs alongside them.
 
 `labels/*.tsv` holds the classification itself, one line per bookmark:
 `record_index <TAB> sub_bucket_code <TAB> comma,separated,tags`.
