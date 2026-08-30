@@ -40,6 +40,15 @@ def build():
             text += f"  [link: {card_text}]"
         text = " ".join(text.split())
 
+        # a second copy that keeps the post's own line breaks: most of these
+        # posts are lists, and reading them as one run-on paragraph is worse.
+        display = re.sub(r"\n{3,}", "\n\n", strip_tco(b.get("full_text")).strip())
+        display = "\n".join(line.rstrip() for line in display.split("\n"))
+        if qt:
+            display += f"\n\n[quoting: {qt}]"
+        if card_text:
+            display += f"\n\n[link: {card_text}]"
+
         article_urls = [u for u in urls if "/i/article/" in u]
         media = [m["url"] for m in b.get("media") or []]
 
@@ -48,6 +57,7 @@ def build():
             "url": f"https://x.com/i/status/{b['tweet_id']}",
             "date": iso_date(b["created_at"]),
             "text": text,
+            "text_display": display,
             "own_text": own,
             "quoted_text": qt,
             "author_id": (b.get("author") or {}).get("user_id"),

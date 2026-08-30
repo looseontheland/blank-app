@@ -1,0 +1,573 @@
+<title>Six Years of Bookmarks</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+  /* ---- tokens: light is the base set, both dark paths only redefine ---- */
+  :root {
+    --ground: #f0f1f4;
+    --sheet: #fbfcfd;
+    --ink: #16191f;
+    --ink-2: #3d434e;
+    --muted: #6c7481;
+    --faint: #949ba7;
+    --rule: #d6dae1;
+    --rule-soft: #e4e7ec;
+    --hover: #eef0f3;
+    --chip: #e7eaee;
+    --shadow: 0 1px 2px rgba(20, 25, 35, .06);
+
+    --c-H: #1f7a63;  --c-B: #9a6416;  --c-A: #4348c9;  --c-S: #82438f;
+    --c-C: #a8494a;  --c-M: #1f6f9c;  --c-U: #6d7684;
+
+    --sans: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+    --display: "Bricolage Grotesque", "IBM Plex Sans", ui-sans-serif, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #101318;
+      --sheet: #171b21;
+      --ink: #e8eaee;
+      --ink-2: #b9bfc9;
+      --muted: #858d9a;
+      --faint: #6a7380;
+      --rule: #262b33;
+      --rule-soft: #1f242b;
+      --hover: #1d222a;
+      --chip: #232830;
+      --shadow: 0 1px 2px rgba(0, 0, 0, .35);
+      --c-H: #45c4a4;  --c-B: #d9a047;  --c-A: #8c92f5;  --c-S: #c47fd0;
+      --c-C: #e08a86;  --c-M: #5fb3e0;  --c-U: #949cab;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #101318;
+    --sheet: #171b21;
+    --ink: #e8eaee;
+    --ink-2: #b9bfc9;
+    --muted: #858d9a;
+    --faint: #6a7380;
+    --rule: #262b33;
+    --rule-soft: #1f242b;
+    --hover: #1d222a;
+    --chip: #232830;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .35);
+    --c-H: #45c4a4;  --c-B: #d9a047;  --c-A: #8c92f5;  --c-S: #c47fd0;
+    --c-C: #e08a86;  --c-M: #5fb3e0;  --c-U: #949cab;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font: 400 15px/1.55 var(--sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+  :focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; border-radius: 2px; }
+
+  /* ---- masthead ---- */
+  .masthead {
+    border-bottom: 1px solid var(--rule);
+    padding: 22px 26px 18px;
+    display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 20px;
+  }
+  .wordmark {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: clamp(1.35rem, 2.4vw, 1.9rem);
+    letter-spacing: -.02em;
+    margin: 0;
+  }
+  .standfirst {
+    color: var(--muted); font-size: 13.5px; max-width: 62ch; margin: 0;
+  }
+  .theme-toggle {
+    margin-left: auto; font: 500 11px/1 var(--mono);
+    letter-spacing: .08em; text-transform: uppercase;
+    color: var(--muted); padding: 7px 11px;
+    border: 1px solid var(--rule); border-radius: 999px;
+  }
+  .theme-toggle:hover { color: var(--ink); border-color: var(--ink); }
+
+  /* ---- shell ---- */
+  .shell {
+    display: grid;
+    grid-template-columns: 268px minmax(0, 1fr);
+    align-items: start;
+    max-width: 1360px;
+    margin: 0 auto;
+  }
+
+  /* ---- drawer (left rail) ---- */
+  .drawer {
+    position: sticky; top: 0;
+    max-height: 100vh; overflow-y: auto;
+    padding: 22px 20px 40px;
+    border-right: 1px solid var(--rule);
+    display: flex; flex-direction: column; gap: 22px;
+  }
+  .drawer-label {
+    font: 500 10.5px/1 var(--mono);
+    letter-spacing: .12em; text-transform: uppercase;
+    color: var(--faint); margin: 0 0 9px;
+  }
+  .search {
+    width: 100%; padding: 9px 11px;
+    background: var(--sheet); color: var(--ink);
+    border: 1px solid var(--rule); border-radius: 3px;
+    font: 400 14px var(--sans);
+  }
+  .search::placeholder { color: var(--faint); }
+  .search:focus { border-color: var(--ink); outline: none; }
+
+  .shelf { border-top: 1px solid var(--rule-soft); }
+  .shelf:first-of-type { border-top: 0; }
+  .shelf-head {
+    width: 100%; display: flex; align-items: center; gap: 9px;
+    padding: 8px 2px; text-align: left;
+  }
+  .shelf-head:hover { color: var(--ink); }
+  .spine { width: 3px; height: 15px; border-radius: 1px; flex: none; background: var(--hue); }
+  .shelf-name { font-weight: 500; font-size: 13.5px; flex: 1; }
+  .shelf-count { font: 400 11.5px var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+  .shelf[data-open="1"] .shelf-name { font-weight: 600; }
+  .shelf.on .shelf-name { font-weight: 600; }
+  .shelf.on .shelf-count { color: var(--ink); }
+
+  .subs { display: none; padding: 0 0 8px 12px; flex-direction: column; }
+  .shelf[data-open="1"] .subs { display: flex; }
+  .sub {
+    display: flex; gap: 8px; align-items: baseline;
+    padding: 4px 2px 4px 8px; text-align: left;
+    border-left: 1px solid var(--rule-soft);
+    font-size: 12.5px; color: var(--muted);
+  }
+  .sub:hover { color: var(--ink); border-left-color: var(--hue); }
+  .sub.on { color: var(--ink); font-weight: 600; border-left-color: var(--hue); }
+  .sub-count { margin-left: auto; font: 400 11px var(--mono); font-variant-numeric: tabular-nums; }
+
+  .control { width: 100%; padding: 8px 10px; background: var(--sheet); color: var(--ink);
+             border: 1px solid var(--rule); border-radius: 3px; font: 400 13px var(--sans); }
+
+  .taglist { display: flex; flex-wrap: wrap; gap: 5px; }
+  .tagbtn {
+    font: 400 11px var(--mono); color: var(--muted);
+    padding: 3px 7px; border: 1px solid var(--rule); border-radius: 999px;
+  }
+  .tagbtn:hover { color: var(--ink); border-color: var(--ink); }
+  .tagbtn.on { background: var(--ink); color: var(--ground); border-color: var(--ink); }
+
+  /* ---- reading column ---- */
+  .column { background: var(--sheet); min-height: 100vh; border-right: 1px solid var(--rule); }
+
+  .shape { padding: 26px 30px 22px; border-bottom: 1px solid var(--rule); }
+  .shape h2 {
+    font: 600 13px var(--sans); margin: 0 0 2px; letter-spacing: -.01em;
+  }
+  .shape p { margin: 0 0 16px; color: var(--muted); font-size: 12.5px; max-width: 60ch; }
+  .chart { display: flex; align-items: flex-end; gap: 10px; height: 132px; }
+  .year { flex: 1; display: flex; flex-direction: column; justify-content: flex-end;
+          gap: 3px; height: 100%; }
+  .year:hover .bar { opacity: .78; }
+  .year.on .bar { outline: 1px solid var(--ink); outline-offset: 1px; }
+  .stack { display: flex; flex-direction: column-reverse; border-radius: 2px; overflow: hidden; }
+  .seg { background: var(--hue); }
+  .year-label { font: 400 10.5px/1.35 var(--mono); color: var(--muted); text-align: center;
+                font-variant-numeric: tabular-nums; padding-top: 5px;
+                border-top: 1px solid var(--rule); }
+  .year-label em { display: block; font-style: normal; color: var(--faint); font-size: 10px; }
+  .year.on .year-label { color: var(--ink); font-weight: 500; border-top-color: var(--ink); }
+  .legend { display: flex; flex-wrap: wrap; gap: 4px 16px; margin-top: 14px; }
+  .legend span { display: flex; align-items: center; gap: 6px;
+                 font: 400 11px var(--mono); color: var(--muted); }
+  .legend i { width: 8px; height: 8px; border-radius: 1px; background: var(--hue); }
+
+  .resultbar {
+    position: sticky; top: 0; z-index: 5;
+    background: var(--sheet); border-bottom: 1px solid var(--rule);
+    padding: 12px 30px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  }
+  .resultcount { font: 600 13px var(--sans); font-variant-numeric: tabular-nums; }
+  .active { display: flex; gap: 6px; flex-wrap: wrap; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    font: 400 11px var(--mono); background: var(--chip);
+    padding: 3px 6px 3px 8px; border-radius: 3px; color: var(--ink-2);
+  }
+  .pill b { font-weight: 500; }
+  .pill button { color: var(--muted); line-height: 1; padding: 0 1px; }
+  .pill button:hover { color: var(--ink); }
+  .clear { margin-left: auto; font: 400 11.5px var(--mono); color: var(--muted);
+           text-decoration: underline; text-underline-offset: 3px; }
+  .clear:hover { color: var(--ink); }
+
+  .entries { display: flex; flex-direction: column; }
+  .entry { padding: 18px 30px 17px; border-bottom: 1px solid var(--rule-soft); }
+  .entry:hover { background: var(--hover); }
+  .meta {
+    display: flex; align-items: center; gap: 9px; flex-wrap: wrap;
+    margin-bottom: 7px;
+  }
+  .meta .spine { height: 12px; }
+  .subname { font: 500 12px var(--sans); color: var(--ink-2); }
+  .dot { color: var(--faint); font-size: 10px; }
+  .stat { font: 400 11px var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+  .flag {
+    font: 500 9.5px var(--mono); letter-spacing: .08em; text-transform: uppercase;
+    border: 1px solid var(--rule); color: var(--muted); padding: 1px 5px; border-radius: 2px;
+  }
+  .text { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; max-width: 74ch; }
+  .text.clip {
+    display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .empty-text { color: var(--faint); font-style: italic; }
+  .more { font: 400 11.5px var(--mono); color: var(--muted); margin-top: 4px;
+          text-decoration: underline; text-underline-offset: 3px; }
+  .more:hover { color: var(--ink); }
+  .foot { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+  .etag { font: 400 11px var(--mono); color: var(--muted); padding: 2px 6px;
+          background: var(--chip); border-radius: 3px; }
+  .etag:hover { color: var(--ink); }
+  .open {
+    margin-left: auto; font: 400 11.5px var(--mono); color: var(--muted);
+    text-decoration: none; white-space: nowrap;
+  }
+  .open:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+
+  .loadmore { display: block; width: 100%; padding: 18px; font: 500 12px var(--mono);
+              letter-spacing: .06em; text-transform: uppercase; color: var(--muted);
+              border-bottom: 1px solid var(--rule-soft); }
+  .loadmore:hover { color: var(--ink); background: var(--hover); }
+  .noresult { padding: 60px 30px; color: var(--muted); }
+
+  .colophon {
+    padding: 30px; border-top: 1px solid var(--rule); color: var(--muted);
+    font-size: 12.5px; line-height: 1.65;
+  }
+  .colophon h3 { font: 600 12px var(--sans); color: var(--ink); margin: 0 0 6px; }
+  .colophon p { margin: 0 0 14px; max-width: 68ch; }
+  .colophon b { color: var(--ink-2); font-weight: 600; }
+
+  @media (max-width: 900px) {
+    .shell { grid-template-columns: 1fr; }
+    .drawer { position: static; max-height: none; border-right: 0;
+              border-bottom: 1px solid var(--rule); }
+    .column { border-right: 0; }
+    .entry, .resultbar, .shape, .colophon { padding-left: 18px; padding-right: 18px; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<header class="masthead">
+  <h1 class="wordmark">Six Years of Bookmarks</h1>
+  <p class="standfirst">3,443 posts saved off X between September 2020 and August 2026, read and shelved one at a time.</p>
+  <button class="theme-toggle" id="themeToggle" type="button">Theme</button>
+</header>
+
+<div class="shell">
+  <aside class="drawer">
+    <div>
+      <p class="drawer-label">Search</p>
+      <input class="search" id="q" type="search" placeholder="taurine, cold email, seedance…" autocomplete="off">
+    </div>
+    <div>
+      <p class="drawer-label">Shelves</p>
+      <div id="shelves"></div>
+    </div>
+    <div>
+      <p class="drawer-label">Sort</p>
+      <select class="control" id="sort">
+        <option value="new">Newest first</option>
+        <option value="old">Oldest first</option>
+        <option value="likes">Most liked</option>
+        <option value="bmk">Most bookmarked</option>
+      </select>
+    </div>
+    <div>
+      <p class="drawer-label">Common tags</p>
+      <div class="taglist" id="tags"></div>
+    </div>
+  </aside>
+
+  <main class="column">
+    <section class="shape">
+      <h2>The shape of the collection</h2>
+      <p>Six years of saving, coloured by shelf. Health and business carried the early years; AI arrives in 2025 and takes over 2026. Click a year to narrow the list.</p>
+      <div class="chart" id="chart"></div>
+      <div class="legend" id="legend"></div>
+    </section>
+
+    <div class="resultbar">
+      <span class="resultcount" id="count"></span>
+      <div class="active" id="active"></div>
+      <button class="clear" id="clear" type="button" hidden>Clear all</button>
+    </div>
+
+    <div class="entries" id="entries"></div>
+    <button class="loadmore" id="loadmore" type="button" hidden></button>
+
+    <footer class="colophon">
+      <h3>How this was built</h3>
+      <p><b>3,136 of the 3,443</b> bookmarks were filed by reading the post's own text and assigning it one shelf, one sub-shelf, and a handful of tags.</p>
+      <p>The rest have no readable text. <b>73</b> were placed by looking at where the rest of that author's bookmarks landed — those are marked <span class="flag">inferred</span> and are a guess. The remaining <b>234</b> sit under Unsorted: <b>147</b> are long-form X Articles whose bodies the export never captured, <b>80</b> carry their content in an image or video, and <b>7</b> are too short to read.</p>
+      <p>Two limits worth knowing. The export left every author's <b>screen name empty</b> — only numeric ids survived, so authors can be clustered but not named. And the images could not be read: the machine that built this page is blocked from <b>pbs.twimg.com</b>, so the planned vision pass never ran.</p>
+    </footer>
+  </main>
+</div>
+
+<script>
+const DATA = /*%%DATA%%*/;
+const { tops, subs, counts, rows } = DATA;
+
+/* rows are positional to keep the page small — name the columns once */
+const ID = 0, DATE = 1, SUB = 2, LIKES = 3, BMK = 4, MEDIA = 5, CONF = 6, TAGS = 7, TEXT = 8;
+const CONF_NAME = ["labeled", "inferred", "unsorted"];
+const TOP_ORDER = ["H", "B", "A", "S", "C", "M", "U"];
+const hue = t => `var(--c-${t})`;
+
+/* shelf totals, and sub-shelves ordered by size within each shelf */
+const shelfTotal = {}, shelfSubs = {};
+for (const [code, [top]] of Object.entries(subs)) {
+  shelfTotal[top] = (shelfTotal[top] || 0) + (counts[code] || 0);
+  (shelfSubs[top] = shelfSubs[top] || []).push(code);
+}
+for (const top in shelfSubs) shelfSubs[top].sort((a, b) => counts[b] - counts[a]);
+
+const state = { q: "", shelf: null, sub: null, tag: null, year: null, sort: "new" };
+let shown = 0, results = [];
+const haystack = new Array(rows.length);   // built lazily, only when searched
+
+const el = id => document.getElementById(id);
+const fmt = n => n.toLocaleString("en-US");
+const esc = s => s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+/* ---------------------------------------------------------- drawer */
+
+function drawShelves() {
+  el("shelves").innerHTML = TOP_ORDER.map(top => `
+    <div class="shelf" data-top="${top}" data-open="0" style="--hue:${hue(top)}">
+      <button class="shelf-head" type="button" data-act="shelf" data-top="${top}">
+        <span class="spine"></span>
+        <span class="shelf-name">${esc(tops[top])}</span>
+        <span class="shelf-count">${fmt(shelfTotal[top])}</span>
+      </button>
+      <div class="subs">
+        ${shelfSubs[top].map(code => `
+          <button class="sub" type="button" data-act="sub" data-sub="${code}" style="--hue:${hue(top)}">
+            <span>${esc(subs[code][1])}</span>
+            <span class="sub-count">${fmt(counts[code])}</span>
+          </button>`).join("")}
+      </div>
+    </div>`).join("");
+}
+
+/* housekeeping tags describe why a post could not be read, not what it's
+   about — they belong to the Unsorted shelf, not the topic cloud */
+const PLUMBING = new Set(["x-article", "body-not-exported", "media-only",
+  "needs-vision", "no-content", "no-text", "inferred-from-author"]);
+
+function drawTags() {
+  const freq = {};
+  for (const r of rows) for (const t of r[TAGS].split(","))
+    if (t && !PLUMBING.has(t)) freq[t] = (freq[t] || 0) + 1;
+  const top = Object.entries(freq).sort((a, b) => b[1] - a[1]).slice(0, 34);
+  el("tags").innerHTML = top.map(([t, n]) =>
+    `<button class="tagbtn" type="button" data-act="tag" data-tag="${esc(t)}">${esc(t)} ${n}</button>`).join("");
+}
+
+/* ---------------------------------------------------------- the shape chart */
+
+function drawChart() {
+  const years = [...new Set(rows.map(r => r[DATE].slice(0, 4)))].sort();
+  const grid = {};
+  for (const r of rows) {
+    const y = r[DATE].slice(0, 4), top = subs[r[SUB]][0];
+    (grid[y] = grid[y] || {})[top] = ((grid[y] || {})[top] || 0) + 1;
+  }
+  const peak = Math.max(...years.map(y => Object.values(grid[y]).reduce((a, b) => a + b, 0)));
+  el("chart").innerHTML = years.map(y => {
+    const total = Object.values(grid[y]).reduce((a, b) => a + b, 0);
+    const h = Math.max(3, Math.round(total / peak * 104));
+    const segs = TOP_ORDER.filter(t => grid[y][t]).map(t =>
+      `<div class="seg" style="--hue:${hue(t)};height:${grid[y][t] / total * 100}%"
+            title="${esc(tops[t])} · ${y} · ${fmt(grid[y][t])}"></div>`).join("");
+    return `<button class="year" type="button" data-act="year" data-year="${y}"
+              title="${y}: ${fmt(total)} bookmarks">
+      <div class="stack bar" style="height:${h}px">${segs}</div>
+      <span class="year-label">${y}<em>${fmt(total)}</em></span>
+    </button>`;
+  }).join("");
+  el("legend").innerHTML = TOP_ORDER.map(t =>
+    `<span style="--hue:${hue(t)}"><i></i>${esc(tops[t])}</span>`).join("");
+}
+
+/* ---------------------------------------------------------- filtering */
+
+function hay(i) {
+  if (haystack[i] === undefined) {
+    const r = rows[i];
+    haystack[i] = (r[TEXT] + " " + r[TAGS] + " " + subs[r[SUB]][1]).toLowerCase();
+  }
+  return haystack[i];
+}
+
+function apply() {
+  const terms = state.q.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  results = [];
+  for (let i = 0; i < rows.length; i++) {
+    const r = rows[i];
+    if (state.sub) { if (r[SUB] !== state.sub) continue; }
+    else if (state.shelf && subs[r[SUB]][0] !== state.shelf) continue;
+    if (state.year && !r[DATE].startsWith(state.year)) continue;
+    if (state.tag && !r[TAGS].split(",").includes(state.tag)) continue;
+    if (terms.length) { const h = hay(i); if (!terms.every(t => h.includes(t))) continue; }
+    results.push(r);
+  }
+  const cmp = {
+    new: (a, b) => a[DATE] < b[DATE] ? 1 : a[DATE] > b[DATE] ? -1 : 0,
+    old: (a, b) => a[DATE] > b[DATE] ? 1 : a[DATE] < b[DATE] ? -1 : 0,
+    likes: (a, b) => b[LIKES] - a[LIKES],
+    bmk: (a, b) => b[BMK] - a[BMK],
+  }[state.sort];
+  results.sort(cmp);
+  shown = 0;
+  el("entries").innerHTML = "";
+  render();
+  paintChrome();
+}
+
+function render() {
+  const slice = results.slice(shown, shown + 40);
+  el("entries").insertAdjacentHTML("beforeend", slice.map(entry).join(""));
+  shown += slice.length;
+  const left = results.length - shown;
+  const btn = el("loadmore");
+  btn.hidden = left <= 0;
+  btn.textContent = `Show 40 more · ${fmt(left)} remaining`;
+  if (!results.length) {
+    el("entries").innerHTML =
+      `<p class="noresult">Nothing on the shelves matches that. Try dropping a filter.</p>`;
+  }
+}
+
+function entry(r) {
+  const [top, subName] = subs[r[SUB]];
+  const long = r[TEXT].length > 420;
+  const body = r[TEXT]
+    ? `<p class="text${long ? " clip" : ""}">${esc(r[TEXT])}</p>` +
+      (long ? `<button class="more" type="button" data-act="more">Show the whole post</button>` : "")
+    : `<p class="text empty-text">No text — the post is an image, a video, or an X Article.</p>`;
+  const flag = r[CONF] ? `<span class="flag">${CONF_NAME[r[CONF]]}</span>` : "";
+  const media = r[MEDIA] ? `<span class="dot">·</span><span class="stat">${r[MEDIA]} media</span>` : "";
+  return `<article class="entry" style="--hue:${hue(top)}">
+    <div class="meta">
+      <span class="spine"></span>
+      <span class="subname">${esc(subName)}</span>
+      <span class="dot">·</span><span class="stat">${r[DATE]}</span>
+      <span class="dot">·</span><span class="stat">${fmt(r[LIKES])} likes</span>
+      <span class="dot">·</span><span class="stat">${fmt(r[BMK])} saves</span>
+      ${media}${flag}
+    </div>
+    ${body}
+    <div class="foot">
+      ${r[TAGS].split(",").filter(Boolean).map(t =>
+        `<button class="etag" type="button" data-act="tag" data-tag="${esc(t)}">${esc(t)}</button>`).join("")}
+      <a class="open" href="https://x.com/i/status/${r[ID]}" target="_blank" rel="noopener">open on X ↗</a>
+    </div>
+  </article>`;
+}
+
+function paintChrome() {
+  el("count").textContent = `${fmt(results.length)} bookmark${results.length === 1 ? "" : "s"}`;
+
+  const pills = [];
+  if (state.q) pills.push(["search", `“${state.q}”`, "q"]);
+  if (state.sub) pills.push(["shelf", subs[state.sub][1], "sub"]);
+  else if (state.shelf) pills.push(["shelf", tops[state.shelf], "shelf"]);
+  if (state.year) pills.push(["year", state.year, "year"]);
+  if (state.tag) pills.push(["tag", state.tag, "tag"]);
+  el("active").innerHTML = pills.map(([label, value, key]) =>
+    `<span class="pill"><b>${label}</b> ${esc(String(value))}
+      <button type="button" data-act="drop" data-key="${key}" aria-label="Remove ${label} filter">✕</button></span>`).join("");
+  el("clear").hidden = !pills.length;
+
+  document.querySelectorAll(".shelf").forEach(node => {
+    const top = node.dataset.top;
+    const active = state.shelf === top;
+    node.classList.toggle("on", active);
+    node.dataset.open = active ? "1" : "0";
+  });
+  document.querySelectorAll(".sub").forEach(node =>
+    node.classList.toggle("on", node.dataset.sub === state.sub));
+  document.querySelectorAll(".tagbtn").forEach(node =>
+    node.classList.toggle("on", node.dataset.tag === state.tag));
+  document.querySelectorAll(".year").forEach(node =>
+    node.classList.toggle("on", node.dataset.year === state.year));
+}
+
+/* ---------------------------------------------------------- events */
+
+document.addEventListener("click", e => {
+  const hit = e.target.closest("[data-act]");
+  if (!hit) return;
+  const act = hit.dataset.act;
+
+  if (act === "more") {
+    hit.previousElementSibling.classList.remove("clip");
+    hit.remove();
+    return;
+  }
+  if (act === "shelf") {
+    const top = hit.dataset.top;
+    state.shelf = state.shelf === top ? null : top;
+    state.sub = null;
+  } else if (act === "sub") {
+    const code = hit.dataset.sub;
+    state.sub = state.sub === code ? null : code;
+    state.shelf = state.sub ? subs[code][0] : state.shelf;
+  } else if (act === "tag") {
+    const tag = hit.dataset.tag;
+    state.tag = state.tag === tag ? null : tag;
+  } else if (act === "year") {
+    const y = hit.dataset.year;
+    state.year = state.year === y ? null : y;
+  } else if (act === "drop") {
+    const key = hit.dataset.key;
+    state[key] = key === "q" ? "" : null;
+    if (key === "shelf") state.sub = null;
+    if (key === "q") el("q").value = "";
+  }
+  apply();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+});
+
+let typing;
+el("q").addEventListener("input", e => {
+  clearTimeout(typing);
+  typing = setTimeout(() => { state.q = e.target.value; apply(); }, 160);
+});
+el("sort").addEventListener("change", e => { state.sort = e.target.value; apply(); });
+el("loadmore").addEventListener("click", render);
+el("clear").addEventListener("click", () => {
+  Object.assign(state, { q: "", shelf: null, sub: null, tag: null, year: null });
+  el("q").value = "";
+  apply();
+});
+
+el("themeToggle").addEventListener("click", () => {
+  const root = document.documentElement;
+  const dark = root.dataset.theme
+    ? root.dataset.theme === "dark"
+    : matchMedia("(prefers-color-scheme: dark)").matches;
+  root.dataset.theme = dark ? "light" : "dark";
+});
+
+drawShelves();
+drawTags();
+drawChart();
+apply();
+</script>

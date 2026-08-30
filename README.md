@@ -52,3 +52,15 @@ python export_csv.py         #                      -> data/bookmarks.csv
   `inferred`; treat them as a guess.
 
 Everything else (3,136 bookmarks) was filed by reading the post itself.
+
+## The site
+
+`site/index.html` is a single self-contained page — the whole library, searchable,
+with no server and no build step at view time.
+
+```
+python build_site.py    # site/template.html + data/classified.json -> site/index.html
+```
+
+Open it directly, or serve the folder. Search full text, click a shelf to expand
+its sub-shelves, click any tag or year to narrow, sort by date or engagement.
