@@ -1,0 +1,88 @@
+{
+  "H": {
+    "name": "Health & Body",
+    "subs": {
+      "H1": "Supplements & Protocols",
+      "H2": "Gut, Parasites & Detox",
+      "H3": "Hormones, Peptides & Enhancement",
+      "H4": "Sleep & Circadian",
+      "H5": "Training & Fitness",
+      "H6": "Skin, Hair, Teeth & Aesthetics",
+      "H7": "Bloodwork, Testing & Diagnostics",
+      "H8": "Nutrition & Diet",
+      "H9": "Nootropics, Mood & Brain",
+      "H10": "Disease, Toxins & Root Cause",
+      "H11": "Health Fundamentals & Lifestyle"
+    }
+  },
+  "B": {
+    "name": "Business & Money",
+    "subs": {
+      "B1": "Cold Email, Lead Gen & Agency",
+      "B2": "Offers, Sales & Closing",
+      "B3": "E-commerce & Physical Products",
+      "B4": "Info-Products, Courses & Coaching",
+      "B5": "SaaS, Startups & Building",
+      "B6": "Case Studies, Income & Money Playbooks",
+      "B7": "Operations, Hiring & Systems",
+      "B8": "Investing, Crypto & Finance",
+      "B9": "Tax, Legal & Asset Protection",
+      "B10": "Grayhat Plays & Content Arbitrage"
+    }
+  },
+  "M": {
+    "name": "Marketing & Content",
+    "subs": {
+      "M1": "Copywriting & Direct Response",
+      "M2": "Social Growth & Algorithms",
+      "M3": "Content Creation & Video",
+      "M4": "Email Marketing & Funnels",
+      "M5": "SEO & Search",
+      "M6": "Paid Ads & Media Buying",
+      "M7": "Branding & Positioning"
+    }
+  },
+  "A": {
+    "name": "AI & Tech",
+    "subs": {
+      "A1": "Prompts & Prompt Engineering",
+      "A2": "AI Agents & Automation",
+      "A3": "AI Tools & Apps",
+      "A4": "Coding & Development",
+      "A5": "AI Industry & Models",
+      "A6": "AI Creative (image/video/audio)"
+    }
+  },
+  "S": {
+    "name": "Mind & Self",
+    "subs": {
+      "S1": "Mindset & Discipline",
+      "S2": "Trauma, Psychology & Inner Work",
+      "S3": "Philosophy & Spirituality",
+      "S4": "Relationships & Dating",
+      "S5": "Social Skills, Status & Charisma",
+      "S6": "Style, Grooming & Presence",
+      "S7": "Learning & Knowledge Systems"
+    }
+  },
+  "C": {
+    "name": "Culture & Misc",
+    "subs": {
+      "C1": "History & Biography",
+      "C2": "Politics & Society",
+      "C3": "Conspiracy & Fringe",
+      "C4": "Humor & Memes",
+      "C5": "Gear, Cars & Consumer",
+      "C6": "Personal & Uncategorizable",
+      "C7": "Travel, Geoarbitrage & Residency"
+    }
+  },
+  "U": {
+    "name": "Unsorted",
+    "subs": {
+      "U1": "X Article (body not in export)",
+      "U2": "Media-only (pending vision pass)",
+      "U3": "Insufficient content"
+    }
+  }
+}
