@@ -51,7 +51,7 @@ date or engagement, and click through to the original post.
 ```
 python build_records.py      # raw xarchive export -> data/records.json
 python build_classified.py   # + labels/*.tsv + signal/cut*.txt -> data/classified.json
-python export_csv.py         #                      -> data/bookmarks.csv
+python export_csv.py         #  -> data/bookmarks.csv + data/bookmarks-signal.csv
 ```
 
 `labels/*.tsv` holds the classification itself, one line per bookmark:
