@@ -20,12 +20,24 @@ def load():
     return items, taxonomy
 
 
-items, taxonomy = load()
+library, taxonomy = load()
+N_SIGNAL = sum(i["signal"] for i in library)
 
 # ---------------------------------------------------------------- sidebar
 
 st.sidebar.title("🔖 Bookmarks")
-st.sidebar.caption(f"{len(items):,} saved posts, 2020–2026")
+
+# Signal is the curated cut: Health keeps everything readable, the other five
+# shelves were judged post by post. See signal/README.md for the rubric.
+view = st.sidebar.radio(
+    "View",
+    ["Signal", "Everything"],
+    captions=[f"{N_SIGNAL:,} posts that carry something reusable",
+              f"all {len(library):,} saved posts"],
+    horizontal=True,
+)
+items = [i for i in library if i["signal"]] if view == "Signal" else library
+st.sidebar.caption(f"{len(items):,} posts in view, 2020–2026")
 
 query = st.sidebar.text_input("Search", placeholder="taurine, cold email, seedance…")
 
@@ -163,13 +175,35 @@ with tab_map:
                  use_container_width=True, hide_index=True)
 
 with tab_about:
-    counts = collections.Counter(i["confidence"] for i in items)
+    counts = collections.Counter(i["confidence"] for i in library)
+    sig_by_top = collections.Counter(i["top"] for i in library if i["signal"])
+    all_by_top = collections.Counter(i["top"] for i in library)
     st.markdown(f"""
 ### Where this came from
 
-An `xarchive` export of **{len(items):,} X bookmarks** (2020-09-29 → 2026-08-30),
+An `xarchive` export of **{len(library):,} X bookmarks** (2020-09-29 → 2026-08-30),
 sorted into {len(taxonomy)} top-level buckets and
 {sum(len(v['subs']) for v in taxonomy.values())} sub-buckets.
+
+### The signal cut
+
+**Signal** is the default view: **{N_SIGNAL:,}** of the {len(library):,} bookmarks.
+Health & Body keeps everything readable — that shelf was already dense. The
+other {sum(n for c, n in all_by_top.items() if c not in "HU"):,} posts were read
+one at a time and kept only if they carried something reusable: a procedure, a
+named tool and how it fits, a copyable prompt or template, a teardown of why
+something works, a case study with numbers *and* method, non-obvious domain
+knowledge, or a real curated list. Cut: personal updates and flexes, motivation
+with no method, promos and withheld-how teasers, context-free replies, memes,
+and opinions with nothing behind them. Anything with no readable body is out of
+Signal by definition.
+
+| Shelf | In library | In Signal |
+|---|---|---|
+""" + "\n".join(
+    f"| {top_names[c]} | {all_by_top[c]:,} | {sig_by_top[c]:,} |"
+    for c, _ in all_by_top.most_common()
+) + f"""
 
 ### How confident each label is
 
@@ -183,7 +217,7 @@ sorted into {len(taxonomy)} top-level buckets and
 
 1. **No author names.** Every `screen_name` in the export is `null`; only numeric
    user ids survived. Authors can be clustered but not named.
-2. **No X Article bodies.** {sum(1 for i in items if i['is_article'])} bookmarks
+2. **No X Article bodies.** {sum(1 for i in library if i['is_article'])} bookmarks
    are long-form X Articles where the export captured only the link. Their text
    lives behind X's auth wall.
 

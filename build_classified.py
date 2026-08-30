@@ -8,6 +8,25 @@ OUT = "/home/user/blank-app/data/classified.json"
 MIN_AUTHOR_ITEMS = 3      # author needs this many labeled bookmarks to vote
 AUTHOR_CONCENTRATION = 0.6  # ...and this share in one top-level bucket
 
+# Signal cut: indices of non-health bookmarks judged to carry no reusable
+# substance (personal updates, promos, engagement bait, context-free replies,
+# generic motivation). See signal/README.md for the rubric.
+CUTS = "/home/user/blank-app/signal/cut*.txt"
+
+
+def load_cuts():
+    cut = set()
+    for path in sorted(glob.glob(CUTS)):
+        cut.update(int(w) for w in open(path).read().split())
+    return cut
+
+
+def is_signal(index, rec, cut):
+    """Health keeps everything that was readable; the rest has to earn it."""
+    if rec["confidence"] != "labeled" or rec["top"] == "U":
+        return False       # no readable body -> nothing to carry
+    return rec["top"] == "H" or index not in cut
+
 
 def load_labels():
     labels = {}
@@ -82,10 +101,16 @@ def build():
                     "sub": sub, "sub_name": sub_names[sub],
                     "tags": tags, "confidence": confidence})
 
+    cut = load_cuts()
+    for i, rec in enumerate(out):
+        rec["signal"] = is_signal(i, rec, cut)
+
     json.dump(out, open(OUT, "w"))
 
+    n_sig = sum(r["signal"] for r in out)
     print(f"classified {len(out)} bookmarks: " +
           ", ".join(f"{n} {k}" for k, n in stats.most_common()))
+    print(f"signal cut: {n_sig} kept, {len(out) - n_sig} set aside")
     print()
     tops = collections.Counter(r["top"] for r in out)
     for code, n in tops.most_common():

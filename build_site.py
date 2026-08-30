@@ -16,7 +16,8 @@ def build():
     # rows are positional to keep the payload small: the page rebuilds the
     # objects on load, and the tweet URL is derived from the id.
     rows = [[i["id"], i["date"], i["sub"], i["likes"], i["bookmarks"],
-             len(i["media"]), CONF[i["confidence"]], ",".join(i["tags"]), i["text_display"]]
+             len(i["media"]), CONF[i["confidence"]], ",".join(i["tags"]),
+             i["text_display"], 1 if i["signal"] else 0]
             for i in items]
     rows.sort(key=lambda r: r[1], reverse=True)
 

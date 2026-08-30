@@ -3,19 +3,38 @@
 An organized, searchable archive of 3,443 X (Twitter) bookmarks spanning
 2020–2026, sorted into 7 top-level buckets and 51 sub-buckets.
 
-![buckets](https://img.shields.io/badge/bookmarks-3%2C443-blue)
+![buckets](https://img.shields.io/badge/bookmarks-3%2C443-blue) ![signal](https://img.shields.io/badge/signal-2%2C202-green)
 
 ## The buckets
 
-| Bucket | Share | What's in it |
-|---|---|---|
-| Health & Body | 26% | Gut/parasites/detox, supplements, hormones & peptides, hair & skin, bloodwork, nutrition, sleep, training |
-| Business & Money | 21% | Cold email & lead gen, grayhat plays, case studies, SaaS, investing, tax & legal, offers & sales |
-| AI & Tech | 17% | Agents & automation, AI creative, prompts, coding, industry news |
-| Mind & Self | 12% | Mindset, psychology & inner work, dating, social skills, learning systems |
-| Culture & Misc | 10% | Travel & geoarbitrage, memes, history, politics, gear |
-| Marketing & Content | 7% | Content & video, paid ads, social growth, copywriting, funnels, SEO |
-| Unsorted | 7% | Posts with no readable text (see caveats) |
+| Bucket | All | Signal | What's in it |
+|---|---|---|---|
+| Health & Body | 886 | 873 | Gut/parasites/detox, supplements, hormones & peptides, hair & skin, bloodwork, nutrition, sleep, training |
+| Business & Money | 727 | 542 | Cold email & lead gen, grayhat plays, case studies, SaaS, investing, tax & legal, offers & sales |
+| AI & Tech | 591 | 401 | Agents & automation, AI creative, prompts, coding, industry news |
+| Mind & Self | 416 | 113 | Mindset, psychology & inner work, dating, social skills, learning systems |
+| Culture & Misc | 335 | 72 | Travel & geoarbitrage, memes, history, politics, gear |
+| Marketing & Content | 254 | 201 | Content & video, paid ads, social growth, copywriting, funnels, SEO |
+| Unsorted | 234 | 0 | Posts with no readable text (see caveats) |
+| **Total** | **3,443** | **2,202** | |
+
+## Signal vs. Everything
+
+Both the site and the app open on **Signal** — 2,202 bookmarks that carry
+something reusable — with **Everything** one click away.
+
+Health & Body keeps everything readable; that shelf was already dense. The other
+2,323 posts were read one at a time and kept only for a concrete procedure, a
+named tool and how it fits, a copyable prompt or template, a teardown of why
+something works, a case study with numbers *and* method, non-obvious domain
+knowledge, or a real curated list. Cut: personal updates and flexes, motivation
+with no method, promos and withheld-how teasers, context-free replies, memes,
+and opinions with nothing behind them. Anything with no readable body is out of
+Signal by definition.
+
+The judgements live in `signal/cut*.txt` (record indices that did not make it);
+`signal/README.md` has the full rubric. `build_classified.py` turns them into the
+`signal` boolean carried by every record, the CSV, the app and the site.
 
 ## Run it
 
@@ -31,7 +50,7 @@ date or engagement, and click through to the original post.
 
 ```
 python build_records.py      # raw xarchive export -> data/records.json
-python build_classified.py   # + labels/*.tsv       -> data/classified.json
+python build_classified.py   # + labels/*.tsv + signal/cut*.txt -> data/classified.json
 python export_csv.py         #                      -> data/bookmarks.csv
 ```
 
@@ -64,3 +83,5 @@ python build_site.py    # site/template.html + data/classified.json -> site/inde
 
 Open it directly, or serve the folder. Search full text, click a shelf to expand
 its sub-shelves, click any tag or year to narrow, sort by date or engagement.
+The View switch at the top of the rail flips between Signal and Everything —
+the shelf counts, the tag cloud and the year chart all recount to match.

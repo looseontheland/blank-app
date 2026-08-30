@@ -123,6 +123,27 @@
   .search::placeholder { color: var(--faint); }
   .search:focus { border-color: var(--ink); outline: none; }
 
+  /* ---- signal / everything switch ---- */
+  .viewpick {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 4px;
+    padding: 4px; background: var(--chip); border-radius: 4px;
+  }
+  .viewpick button {
+    padding: 7px 4px; border-radius: 3px; color: var(--muted);
+    font: 500 12px/1.35 var(--sans); text-align: center;
+  }
+  .viewpick button em {
+    display: block; font: 400 10.5px var(--mono); font-style: normal;
+    font-variant-numeric: tabular-nums; color: var(--faint);
+  }
+  .viewpick button:hover { color: var(--ink); }
+  .viewpick button.on {
+    background: var(--sheet); color: var(--ink); font-weight: 600;
+    box-shadow: var(--shadow);
+  }
+  .viewpick button.on em { color: var(--muted); }
+  .viewnote { margin: 9px 0 0; font-size: 12px; line-height: 1.5; color: var(--muted); }
+
   .shelf { border-top: 1px solid var(--rule-soft); }
   .shelf:first-of-type { border-top: 0; }
   .shelf-head {
@@ -264,12 +285,20 @@
 
 <header class="masthead">
   <h1 class="wordmark">Six Years of Bookmarks</h1>
-  <p class="standfirst">3,443 posts saved off X between September 2020 and August 2026, read and shelved one at a time.</p>
+  <p class="standfirst">3,443 posts saved off X between September 2020 and August 2026, read and shelved one at a time. 2,202 of them carry something reusable — those are the Signal view.</p>
   <button class="theme-toggle" id="themeToggle" type="button">Theme</button>
 </header>
 
 <div class="shell">
   <aside class="drawer">
+    <div>
+      <p class="drawer-label">View</p>
+      <div class="viewpick" id="viewpick">
+        <button type="button" data-act="view" data-view="signal">Signal<em id="nSignal"></em></button>
+        <button type="button" data-act="view" data-view="all">Everything<em id="nAll"></em></button>
+      </div>
+      <p class="viewnote" id="viewnote"></p>
+    </div>
     <div>
       <p class="drawer-label">Search</p>
       <input class="search" id="q" type="search" placeholder="taurine, cold email, seedance…" autocomplete="off">
@@ -311,6 +340,10 @@
     <button class="loadmore" id="loadmore" type="button" hidden></button>
 
     <footer class="colophon">
+      <h3>The signal cut</h3>
+      <p><b>Signal</b> is the default view: <b>2,202</b> of the 3,443 bookmarks. Health &amp; Body keeps everything readable — that shelf was already dense. The other 2,323 posts were read one at a time and kept only if they carried something reusable: a procedure, a named tool and how it fits, a copyable prompt or template, a teardown of why something works, a case study with numbers <em>and</em> method, non-obvious domain knowledge, or a real curated list. Cut: personal updates and flexes, motivation with no method, promos and withheld-how teasers, context-free replies, memes, opinions with nothing behind them.</p>
+      <p>The cut falls hardest where you'd expect. Mind &amp; Self drops from <b>416 to 113</b> and Culture &amp; Misc from <b>335 to 72</b>; Business &amp; Money keeps <b>542 of 727</b> and AI &amp; Tech <b>401 of 591</b>. Everything without a readable body is out of Signal by definition. <b>Everything</b> restores the full library, unchanged.</p>
+
       <h3>How this was built</h3>
       <p><b>3,136 of the 3,443</b> bookmarks were filed by reading the post's own text and assigning it one shelf, one sub-shelf, and a handful of tags.</p>
       <p>The rest have no readable text. <b>73</b> were placed by looking at where the rest of that author's bookmarks landed — those are marked <span class="flag">inferred</span> and are a guess. The remaining <b>234</b> sit under Unsorted: <b>147</b> are long-form X Articles whose bodies the export never captured, <b>80</b> carry their content in an image or video, and <b>7</b> are too short to read.</p>
@@ -324,20 +357,35 @@ const DATA = /*%%DATA%%*/;
 const { tops, subs, counts, rows } = DATA;
 
 /* rows are positional to keep the page small — name the columns once */
-const ID = 0, DATE = 1, SUB = 2, LIKES = 3, BMK = 4, MEDIA = 5, CONF = 6, TAGS = 7, TEXT = 8;
+const ID = 0, DATE = 1, SUB = 2, LIKES = 3, BMK = 4, MEDIA = 5, CONF = 6, TAGS = 7, TEXT = 8, SIG = 9;
 const CONF_NAME = ["labeled", "inferred", "unsorted"];
 const TOP_ORDER = ["H", "B", "A", "S", "C", "M", "U"];
 const hue = t => `var(--c-${t})`;
 
-/* shelf totals, and sub-shelves ordered by size within each shelf */
-const shelfTotal = {}, shelfSubs = {};
-for (const [code, [top]] of Object.entries(subs)) {
-  shelfTotal[top] = (shelfTotal[top] || 0) + (counts[code] || 0);
-  (shelfSubs[top] = shelfSubs[top] || []).push(code);
-}
+/* sub-shelves ordered by size across the whole library — the order stays put
+   when you switch views, only the numbers move */
+const shelfSubs = {};
+for (const [code, [top]] of Object.entries(subs)) (shelfSubs[top] = shelfSubs[top] || []).push(code);
 for (const top in shelfSubs) shelfSubs[top].sort((a, b) => counts[b] - counts[a]);
 
-const state = { q: "", shelf: null, sub: null, tag: null, year: null, sort: "new" };
+const state = { q: "", shelf: null, sub: null, tag: null, year: null, sort: "new", view: "signal" };
+
+/* the pool the whole page describes: Signal, or the full library */
+const inView = r => state.view === "all" || r[SIG];
+const N_SIGNAL = rows.reduce((n, r) => n + (r[SIG] ? 1 : 0), 0);
+
+/* counts for the drawer, recomputed per view */
+let subCount = {}, shelfTotal = {}, shelves = [];
+function recount() {
+  subCount = {}; shelfTotal = {};
+  for (const r of rows) {
+    if (!inView(r)) continue;
+    const top = subs[r[SUB]][0];
+    subCount[r[SUB]] = (subCount[r[SUB]] || 0) + 1;
+    shelfTotal[top] = (shelfTotal[top] || 0) + 1;
+  }
+  shelves = TOP_ORDER.filter(t => shelfTotal[t]);
+}
 let shown = 0, results = [];
 const haystack = new Array(rows.length);   // built lazily, only when searched
 
@@ -348,7 +396,7 @@ const esc = s => s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&
 /* ---------------------------------------------------------- drawer */
 
 function drawShelves() {
-  el("shelves").innerHTML = TOP_ORDER.map(top => `
+  el("shelves").innerHTML = shelves.map(top => `
     <div class="shelf" data-top="${top}" data-open="0" style="--hue:${hue(top)}">
       <button class="shelf-head" type="button" data-act="shelf" data-top="${top}">
         <span class="spine"></span>
@@ -356,10 +404,10 @@ function drawShelves() {
         <span class="shelf-count">${fmt(shelfTotal[top])}</span>
       </button>
       <div class="subs">
-        ${shelfSubs[top].map(code => `
+        ${shelfSubs[top].filter(code => subCount[code]).map(code => `
           <button class="sub" type="button" data-act="sub" data-sub="${code}" style="--hue:${hue(top)}">
             <span>${esc(subs[code][1])}</span>
-            <span class="sub-count">${fmt(counts[code])}</span>
+            <span class="sub-count">${fmt(subCount[code])}</span>
           </button>`).join("")}
       </div>
     </div>`).join("");
@@ -372,8 +420,11 @@ const PLUMBING = new Set(["x-article", "body-not-exported", "media-only",
 
 function drawTags() {
   const freq = {};
-  for (const r of rows) for (const t of r[TAGS].split(","))
-    if (t && !PLUMBING.has(t)) freq[t] = (freq[t] || 0) + 1;
+  for (const r of rows) {
+    if (!inView(r)) continue;
+    for (const t of r[TAGS].split(","))
+      if (t && !PLUMBING.has(t)) freq[t] = (freq[t] || 0) + 1;
+  }
   const top = Object.entries(freq).sort((a, b) => b[1] - a[1]).slice(0, 34);
   el("tags").innerHTML = top.map(([t, n]) =>
     `<button class="tagbtn" type="button" data-act="tag" data-tag="${esc(t)}">${esc(t)} ${n}</button>`).join("");
@@ -384,14 +435,17 @@ function drawTags() {
 function drawChart() {
   const years = [...new Set(rows.map(r => r[DATE].slice(0, 4)))].sort();
   const grid = {};
+  for (const y of years) grid[y] = {};
   for (const r of rows) {
+    if (!inView(r)) continue;
     const y = r[DATE].slice(0, 4), top = subs[r[SUB]][0];
-    (grid[y] = grid[y] || {})[top] = ((grid[y] || {})[top] || 0) + 1;
+    grid[y][top] = (grid[y][top] || 0) + 1;
   }
-  const peak = Math.max(...years.map(y => Object.values(grid[y]).reduce((a, b) => a + b, 0)));
+  const sum = y => Object.values(grid[y]).reduce((a, b) => a + b, 0);
+  const peak = Math.max(1, ...years.map(sum));
   el("chart").innerHTML = years.map(y => {
-    const total = Object.values(grid[y]).reduce((a, b) => a + b, 0);
-    const h = Math.max(3, Math.round(total / peak * 104));
+    const total = sum(y);
+    const h = total ? Math.max(3, Math.round(total / peak * 104)) : 2;
     const segs = TOP_ORDER.filter(t => grid[y][t]).map(t =>
       `<div class="seg" style="--hue:${hue(t)};height:${grid[y][t] / total * 100}%"
             title="${esc(tops[t])} · ${y} · ${fmt(grid[y][t])}"></div>`).join("");
@@ -401,7 +455,7 @@ function drawChart() {
       <span class="year-label">${y}<em>${fmt(total)}</em></span>
     </button>`;
   }).join("");
-  el("legend").innerHTML = TOP_ORDER.map(t =>
+  el("legend").innerHTML = shelves.map(t =>
     `<span style="--hue:${hue(t)}"><i></i>${esc(tops[t])}</span>`).join("");
 }
 
@@ -420,6 +474,7 @@ function apply() {
   results = [];
   for (let i = 0; i < rows.length; i++) {
     const r = rows[i];
+    if (!inView(r)) continue;
     if (state.sub) { if (r[SUB] !== state.sub) continue; }
     else if (state.shelf && subs[r[SUB]][0] !== state.shelf) continue;
     if (state.year && !r[DATE].startsWith(state.year)) continue;
@@ -449,8 +504,11 @@ function render() {
   btn.hidden = left <= 0;
   btn.textContent = `Show 40 more · ${fmt(left)} remaining`;
   if (!results.length) {
+    const hint = state.view === "signal"
+      ? " Some of what you're after may sit outside the signal cut — try Everything."
+      : "";
     el("entries").innerHTML =
-      `<p class="noresult">Nothing on the shelves matches that. Try dropping a filter.</p>`;
+      `<p class="noresult">Nothing on the shelves matches that. Try dropping a filter.${hint}</p>`;
   }
 }
 
@@ -483,6 +541,12 @@ function entry(r) {
 
 function paintChrome() {
   el("count").textContent = `${fmt(results.length)} bookmark${results.length === 1 ? "" : "s"}`;
+
+  document.querySelectorAll("#viewpick button").forEach(node =>
+    node.classList.toggle("on", node.dataset.view === state.view));
+  el("viewnote").textContent = state.view === "signal"
+    ? "Only the posts carrying something reusable. Health keeps everything; the other shelves were judged one by one."
+    : "The whole library, including the flexes, memes and posts with no readable text.";
 
   const pills = [];
   if (state.q) pills.push(["search", `“${state.q}”`, "q"]);
@@ -535,6 +599,16 @@ document.addEventListener("click", e => {
   } else if (act === "year") {
     const y = hit.dataset.year;
     state.year = state.year === y ? null : y;
+  } else if (act === "view") {
+    const v = hit.dataset.view;
+    if (v === state.view) return;
+    state.view = v;
+    recount();
+    if (state.sub && !subCount[state.sub]) state.sub = null;
+    if (state.shelf && !shelfTotal[state.shelf]) state.shelf = null;
+    drawShelves();
+    drawTags();
+    drawChart();
   } else if (act === "drop") {
     const key = hit.dataset.key;
     state[key] = key === "q" ? "" : null;
@@ -566,6 +640,10 @@ el("themeToggle").addEventListener("click", () => {
   root.dataset.theme = dark ? "light" : "dark";
 });
 
+el("nSignal").textContent = fmt(N_SIGNAL);
+el("nAll").textContent = fmt(rows.length);
+
+recount();
 drawShelves();
 drawTags();
 drawChart();
